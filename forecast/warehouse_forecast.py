@@ -1,15 +1,21 @@
 """
-Minimal script to run the Toto model for warehouse SKU sales forecasting.
+Warehouse SKU Sales Forecasting Module using Toto Model
+
+This module provides functionality to forecast warehouse sales/inventory data using 
+the Datadog Toto model, a state-of-the-art time series forecasting model.
 
 Pipeline:
-- Loads the Toto model (model/toto.py)
-- Reads CoffeeSales.csv directly from data_preparation folder
-- Builds input structure (MaskedTimeseries, data/util/dataset.py)
-- Runs prediction using TotoForecaster (inference/forecaster.py)
-- Returns the forecast as a CSV string (suitable for API responses)
+1. Loads the pre-trained Toto model (from Datadog/Toto-Open-Base-1.0)
+2. Processes input CSV data with historical sales/inventory information
+3. Builds input structure using MaskedTimeseries (data/util/dataset.py)
+4. Runs prediction using TotoForecaster (inference/forecaster.py)
+5. Returns the forecast as a CSV string (suitable for API responses or file downloads)
 
-Author: [Your Name or Team]
-Date: [Optional]
+The module is designed to work with the Streamlit web application but can also
+be used independently for batch processing or API integration.
+
+Author: R2Talk Team
+Date: July 2025
 """
 import sys
 import os
@@ -24,28 +30,37 @@ from inference.forecaster import TotoForecaster
 
 def execute_forecast(csv_content: str, forecast_length: int = 30) -> str:
     """
-    Runs the Toto forecasting pipeline on provided CSV content.
+    Runs the Toto forecasting pipeline on provided CSV content to generate time series forecasts.
 
     Args:
-        csv_content (str): The raw CSV content of sales history, as a string.
-            - Expected format: semicolon-separated, with 'DATE' and 'VALUE' columns.
+        csv_content (str): The raw CSV content of historical sales/inventory data, as a string.
+            - Expected format: semicolon (;) separated
+            - Decimal separator: comma (,)
+            - Required columns: 'DATE' (in DD/MM/YYYY format) and 'VALUE' (numeric)
+            - Data should be in chronological order (will be sorted if not)
         forecast_length (int, optional): Number of future time steps to forecast (the prediction horizon).
-            Defaults to 30.
+            Defaults to 30. Valid range is 7-90 days.
 
     Returns:
-        str: CSV string with forecasted values for each time step.
-            - Columns: 'DATE', 'VALUE'
-            - Each row: one forecasted time point.
+        str: CSV string with forecasted values for each future time step.
+            - Format: semicolon (;) separated with comma (,) as decimal separator
+            - Columns: 'DATE' (in DD/MM/YYYY format), 'VALUE' (forecasted quantity)
+            - Each row represents one forecasted day
+            - Values are rounded to integers and negative values are clipped to zero
 
     Steps:
-        1. Parses the input CSV content.
-        2. Loads the Toto model and prepares input tensors.
-        3. Runs the forecast for the specified horizon.
-        4. Builds a DataFrame with forecast results and returns it as a CSV string.
+        1. Parses and validates the input CSV content
+        2. Converts data to tensor format required by the model
+        3. Loads the pre-trained Toto model from Datadog
+        4. Creates a MaskedTimeseries object with appropriate masks and timestamps
+        5. Runs the forecast for the specified horizon
+        6. Processes model output and formats as CSV string
 
     Notes:
-        - The function is designed for in-memory operation (no files are read or written).
-        - Raises exceptions if the input is malformed or forecasting fails.
+        - The function is designed for in-memory operation (no files are read or written)
+        - Uses GPU acceleration if available, otherwise falls back to CPU
+        - Raises exceptions with descriptive messages if the input is malformed or forecasting fails
+        - Forecast dates continue from the last date in the input data with daily frequency
     """
     # Step 1: Parse the CSV content
     try:
