@@ -1,3 +1,25 @@
+"""
+Warehouse Forecaster - Streamlit Web Application
+
+This application provides a user-friendly web interface for forecasting warehouse inventory
+or sales data using the Toto forecasting model. Users can upload their historical data
+in CSV format or use the provided example data to generate forecasts.
+
+Features:
+- CSV file upload with validation
+- Configurable forecast horizon (7-90 days)
+- Interactive data visualization
+- Example data for demonstration
+- Downloadable forecast results
+- Domain-restricted access for security
+
+The application is built with Streamlit and integrates with the warehouse_forecast module
+which handles the actual forecasting using the Datadog Toto model.
+
+Author: R2Talk Team
+Date: July 2025
+"""
+
 import streamlit as st
 import pandas as pd
 import io
@@ -17,8 +39,21 @@ header {visibility: hidden;}
 
 def validate_csv(file):
     """
-    Validate that the uploaded CSV file has the required columns: DATE and VALUE.
-    Returns a tuple of (is_valid, error_message, csv_content)
+    Validate that the uploaded CSV file meets the required format specifications.
+    
+    Args:
+        file: A file-like object containing the uploaded CSV data
+        
+    Returns:
+        tuple: A 3-element tuple containing:
+            - is_valid (bool): True if the file is valid, False otherwise
+            - error_message (str): Empty string if valid, otherwise contains error details
+            - csv_content (str): The file content as a string if valid, None otherwise
+            
+    Validation checks:
+        - File can be decoded as UTF-8
+        - File is valid CSV with semicolon separator and comma decimal
+        - Required columns (DATE, VALUE) are present
     """
     try:
         # Read the file content
@@ -41,6 +76,25 @@ def validate_csv(file):
 # --- Main App ---
 
 def main():
+    """
+    Main application function that sets up and runs the Streamlit web interface.
+    
+    This function handles:
+    1. Page configuration and styling
+    2. Domain validation for security
+    3. User interface layout and components
+    4. File upload and validation
+    5. Example data processing
+    6. Forecast generation and visualization
+    7. Result download functionality
+    
+    The application follows a sidebar + main panel layout pattern with
+    inputs in the sidebar and results/instructions in the main panel.
+    
+    State is managed through Streamlit's session_state to persist
+    forecast results between interactions.
+    """
+    
     # Set page config first as it must be the first Streamlit command
     st.set_page_config(
         page_title="Warehouse Forecaster",
