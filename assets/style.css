@@ -28,7 +28,7 @@
 
 /* Button styling */
 .stButton > button {
-    background-color: #4e73df;
+    background-color: #0066cc;
     color: white;
     font-weight: 500;
     border: none;
@@ -36,8 +36,36 @@
 }
 
 .stButton > button:hover {
-    background-color: #2e59d9;
+    background-color: #0052a3;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Primary button styling */
+/* Target Streamlit's primary button with higher specificity */
+div.stButton > button[data-baseweb="button"],
+button.st-emotion-cache-19rxjzo,
+button.st-emotion-cache-19rxjzo:hover,
+button.st-emotion-cache-19rxjzo:focus,
+button.st-emotion-cache-19rxjzo:active,
+button.st-emotion-cache-1cpxm7s,
+button.st-emotion-cache-1cpxm7s:hover,
+button.st-emotion-cache-1cpxm7s:focus,
+button.st-emotion-cache-1cpxm7s:active,
+button[kind="primary"],
+button.st-bw,
+button.st-bw:hover {
+    background-color: #0066cc !important;
+    border-color: #0066cc !important;
+}
+
+/* Hover state for primary buttons */
+div.stButton > button[data-baseweb="button"]:hover,
+button.st-emotion-cache-19rxjzo:hover,
+button.st-emotion-cache-1cpxm7s:hover,
+button[kind="primary"]:hover,
+button.st-bw:hover {
+    background-color: #0052a3 !important;
+    border-color: #0052a3 !important;
 }
 
 /* Success message styling */

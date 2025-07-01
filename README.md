@@ -1,3 +1,127 @@
+# Previsor de Estoque para Armazém
+
+Uma poderosa aplicação de previsão de séries temporais para gestão de estoque de armazéns, construída com Streamlit e o modelo de previsão Toto.
+
+## Visão Geral
+
+O Previsor de Estoque para Armazém é uma aplicação web que permite aos usuários carregar dados históricos de vendas/estoque e gerar previsões precisas para períodos futuros. A aplicação utiliza o modelo Toto, um modelo de previsão de séries temporais de última geração da Datadog, para fornecer previsões confiáveis.
+
+## Funcionalidades
+
+- **Interface fácil de usar**: Carregue seus dados e obtenha previsões com apenas alguns cliques
+- **Visualização interativa**: Veja os resultados da previsão em tabelas e gráficos
+- **Horizonte de previsão configurável**: Escolha quantos dias no futuro você deseja prever
+- **Dados de exemplo incluídos**: Experimente a aplicação com dados de amostra incluídos
+- **Processamento seguro**: Seus dados são processados com segurança e não são armazenados
+
+## Requisitos
+
+- Python 3.8+
+- Dependências listadas em `requirements.txt`
+
+## Instalação
+
+1. Clone o repositório:
+   ```
+   git clone <repository-url>
+   cd r2bit_WarehouseForecaster
+   ```
+
+2. Crie um ambiente virtual (recomendado):
+   ```
+   python -m venv venv
+   ```
+
+3. Ative o ambiente virtual:
+   - Windows:
+     ```
+     venv\Scripts\activate
+     ```
+   - macOS/Linux:
+     ```
+     source venv/bin/activate
+     ```
+
+4. Instale as dependências:
+   ```
+   pip install -r requirements.txt
+   ```
+
+## Executando a Aplicação
+
+Inicie a aplicação Streamlit com:
+
+```
+streamlit run streamlit_app.py
+```
+
+A aplicação estará disponível em `http://localhost:8501` por padrão.
+
+## Formato dos Dados
+
+Seu arquivo CSV de entrada deve:
+- Usar ponto e vírgula (`;`) como separador
+- Usar vírgula (`,`) como separador decimal
+- Conter duas colunas:
+  - `DATE`: Formatada como DD/MM/AAAA
+  - `VALUE`: Valores numéricos representando quantidades de vendas ou estoque
+
+Exemplo:
+```
+DATE;VALUE
+01/01/2023;120
+02/01/2023;135
+03/01/2023;142
+...
+```
+
+## Configuração
+
+A aplicação permite configurar:
+
+- **Duração da Previsão**: O número de dias para prever (7-90 dias)
+
+## Detalhes do Modelo
+
+A previsão é alimentada pelo modelo Toto da Datadog, que é um modelo de previsão de séries temporais baseado em transformers. O pipeline do modelo:
+
+1. Carrega o modelo Toto
+2. Processa os dados de entrada
+3. Executa a previsão usando TotoForecaster
+4. Retorna a previsão como uma string CSV
+
+## Segurança
+
+- A aplicação executa validação de domínio para garantir que seja acessível apenas a partir de domínios autorizados
+- Os dados são processados em memória e não são armazenados
+- Nenhuma chamada de API externa é feita com seus dados
+
+## Exemplo de Uso
+
+1. Abra a aplicação em seu navegador web
+2. Use os dados de exemplo fornecidos ou carregue seu próprio arquivo CSV
+3. Defina a duração da previsão desejada usando o controle deslizante
+4. Clique em "Gerar Previsão"
+5. Veja os resultados e baixe a previsão como um arquivo CSV
+
+## Solução de Problemas
+
+Se você encontrar problemas:
+
+1. Certifique-se de que seu arquivo CSV segue o formato necessário
+2. Verifique se seus dados estão ordenados cronologicamente
+3. Verifique se você tem todas as dependências necessárias instaladas
+
+## Licença
+
+Licença MIT
+
+## Contato
+
+Para suporte ou consultas, entre em contato com [R2Talk](https://waapp.r2talk.com.br).
+
+---
+
 # Warehouse Forecaster
 
 A powerful time series forecasting application for warehouse inventory management, built with Streamlit and the Toto forecasting model.
@@ -119,3 +243,8 @@ MIT License
 ## Contact
 
 For support or inquiries, please contact [R2Talk](https://waapp.r2talk.com.br).
+
+
+
+
+

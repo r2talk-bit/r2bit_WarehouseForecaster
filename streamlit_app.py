@@ -32,6 +32,25 @@ hide_streamlit_style = """
 footer {visibility: hidden;}
 header {visibility: hidden;}
 [data-testid="collapsedControl"] {display: none;}
+
+/* Override primary button color to blue */
+button[kind="primary"],
+button.st-emotion-cache-19rxjzo,
+button.st-emotion-cache-1cpxm7s,
+button.st-bw,
+div.stButton button[data-baseweb="button"] {
+    background-color: #0066cc !important;
+    border-color: #0066cc !important;
+}
+
+button[kind="primary"]:hover,
+button.st-emotion-cache-19rxjzo:hover,
+button.st-emotion-cache-1cpxm7s:hover,
+button.st-bw:hover,
+div.stButton button[data-baseweb="button"]:hover {
+    background-color: #0052a3 !important;
+    border-color: #0052a3 !important;
+}
 </style>
 """
 
