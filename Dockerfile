@@ -42,4 +42,4 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:$STREAMLIT_SERVER_PORT/_stcore/health || exit 1
 
 # Command to run the application
-CMD ["streamlit", "run", "streamlit_app.py", "--server.port=$STREAMLIT_SERVER_PORT", "--server.address=0.0.0.0"]
+CMD streamlit run streamlit_app.py --server.port=${STREAMLIT_SERVER_PORT} --server.address=0.0.0.0
