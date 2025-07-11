@@ -112,31 +112,59 @@ def execute_forecast(csv_content: str, forecast_length: int = 30) -> str:
     # Load the AI model - first check if we already have it, otherwise download it
     import os
     
-    # Define where the model should be stored on the computer
-    local_model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "model", "pretrained")
+    # Define possible model paths to try in order
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    model_paths = [
+        os.path.join(base_dir, "model"),  # Try the model directory first
+        os.path.join(base_dir, "model", "pretrained")  # Then try the pretrained subdirectory
+    ]
     
-    # Try to load the model using these steps:
-    # 1. Check if it's already on the computer
-    # 2. If not, download it from the internet
-    # 3. If that fails, try a different download method
-    try:
-        if os.path.exists(local_model_path) and os.path.isdir(local_model_path):
-            # The model is already on the computer, so use it
-            print(f"[INFO] Loading model from local path: {local_model_path}")
-            toto = Toto.from_pretrained(local_model_path)
-        else:
-            # The model isn't on the computer, so download it
+    # Look for the model in the nested directory structure
+    pretrained_dir = os.path.join(base_dir, "model", "pretrained")
+    if os.path.exists(pretrained_dir) and os.path.isdir(pretrained_dir):
+        # Find the Datadog model directory
+        for root, dirs, _ in os.walk(pretrained_dir):
+            if "models--Datadog--Toto-Open-Base-1.0" in dirs:
+                datadog_dir = os.path.join(root, "models--Datadog--Toto-Open-Base-1.0")
+                # Find the snapshot directory
+                for _, snapshot_dirs, _ in os.walk(datadog_dir):
+                    if "snapshots" in snapshot_dirs:
+                        snapshot_dir = os.path.join(datadog_dir, "snapshots")
+                        # Find the hash directory containing the model files
+                        for _, hash_dirs, _ in os.walk(snapshot_dir):
+                            if hash_dirs:  # Use the first hash directory found
+                                model_dir = os.path.join(snapshot_dir, hash_dirs[0])
+                                # Add this path to the beginning of our search paths
+                                model_paths.insert(0, model_dir)
+                                break
+                        break
+                break
+    
+    # Try to load the model from each path in order
+    model_loaded = False
+    for path in model_paths:
+        try:
+            if os.path.exists(path) and os.path.isdir(path):
+                print(f"[INFO] Attempting to load model from: {path}")
+                toto = Toto.from_pretrained(path)
+                print(f"[INFO] Successfully loaded model from: {path}")
+                model_loaded = True
+                break
+        except Exception as e:
+            print(f"[WARNING] Could not load model from {path}: {str(e)}")
+    
+    # If we couldn't load from any local path, try downloading from Hugging Face
+    if not model_loaded:
+        try:
             print("[INFO] Local model not found, downloading from Hugging Face Hub...")
-            # Create a folder to store the model
-            os.makedirs(local_model_path, exist_ok=True)
-            # Download the model and save it to the folder
-            toto = Toto.from_pretrained('Datadog/Toto-Open-Base-1.0', cache_dir=local_model_path)
-    except Exception as e:
-        # If something went wrong with the download, try one more method
-        print(f"[WARNING] Error loading/downloading model: {str(e)}")
-        print("[INFO] Falling back to direct model loading...")
-        # Try to download directly without saving
-        toto = Toto.from_pretrained('Datadog/Toto-Open-Base-1.0')
+            # Try to download directly
+            toto = Toto.from_pretrained('Datadog/Toto-Open-Base-1.0')
+            print("[INFO] Successfully downloaded model from Hugging Face Hub")
+        except Exception as e:
+            # If all attempts fail, raise a clear error
+            error_msg = f"Failed to load model from any location. Last error: {str(e)}"
+            print(f"[ERROR] {error_msg}")
+            raise Exception(error_msg)
     
     # Move the model to the right hardware (GPU or CPU)
     toto.to(device)

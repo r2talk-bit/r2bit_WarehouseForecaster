@@ -164,6 +164,15 @@ def main():
         layout="wide"                      # Use the full width of the screen
     )
     
+    # --- Initialize Session State Variables ---
+    # Initialize session state variables if they don't exist
+    if 'forecast_result' not in st.session_state:
+        st.session_state.forecast_result = None
+    if 'forecast_df' not in st.session_state:
+        st.session_state.forecast_df = None
+    if 'error_message' not in st.session_state:
+        st.session_state.error_message = None
+    
     # --- Security: Domain Restriction ---
     # This section checks if the app is being accessed from an allowed domain
     # For beginners: This is a security measure to prevent unauthorized access

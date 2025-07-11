@@ -31,6 +31,10 @@ RUN pip install --upgrade pip && \
 # Copy application code
 COPY --chown=appuser:appuser . .
 
+# Ensure model directories exist with proper permissions
+RUN mkdir -p /app/forecast/model/pretrained && \
+    chown -R appuser:appuser /app/forecast
+
 # Switch to non-root user for security
 USER appuser
 
