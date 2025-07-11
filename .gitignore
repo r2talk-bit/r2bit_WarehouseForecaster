@@ -63,5 +63,6 @@ Thumbs.db
 
 # Large model files
 forecast/model/pretrained/models--Datadog--Toto-Open-Base-1.0/snapshots/4ed2b06bae300c59e77abbf6ad9b67dfd6ce3f85/model.safetensors
+forecast/model/pretrained/models--Datadog--Toto-Open-Base-1.0/snapshots/
 # Ignore all safetensors files (they are typically large model files)
 *.safetensors
