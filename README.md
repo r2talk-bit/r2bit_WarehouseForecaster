@@ -47,6 +47,18 @@ O Previsor de Estoque para Armazém é uma aplicação web que permite aos usuá
    pip install -r requirements.txt
    ```
 
+5. Baixe o modelo Toto do Hugging Face:
+   O modelo Toto é um arquivo grande e não está incluído no repositório. Você precisa baixá-lo manualmente do Hugging Face.
+   ```
+   # Instale a biblioteca Hugging Face
+   pip install huggingface_hub
+   
+   # Baixe o modelo usando a CLI do Hugging Face
+   python -c "from huggingface_hub import hf_hub_download; hf_hub_download(repo_id='datadog/toto', filename='toto.pt', local_dir='models/')"
+   ```
+   
+   Alternativamente, você pode baixar o modelo diretamente do [Hugging Face](https://huggingface.co/datadog/toto) e colocá-lo na pasta `models/` do projeto.
+
 ## Executando a Aplicação
 
 Inicie a aplicação Streamlit com:
@@ -85,10 +97,12 @@ A aplicação permite configurar:
 
 A previsão é alimentada pelo modelo Toto da Datadog, que é um modelo de previsão de séries temporais baseado em transformers. O pipeline do modelo:
 
-1. Carrega o modelo Toto
+1. Carrega o modelo Toto (que deve ser baixado separadamente do Hugging Face devido ao seu tamanho)
 2. Processa os dados de entrada
 3. Executa a previsão usando TotoForecaster
 4. Retorna a previsão como uma string CSV
+
+**Nota importante**: O modelo Toto é um arquivo grande (aproximadamente 300MB) e não está incluído no repositório. Siga as instruções de instalação para baixá-lo do Hugging Face antes de executar a aplicação.
 
 ## Segurança
 
@@ -111,6 +125,8 @@ Se você encontrar problemas:
 1. Certifique-se de que seu arquivo CSV segue o formato necessário
 2. Verifique se seus dados estão ordenados cronologicamente
 3. Verifique se você tem todas as dependências necessárias instaladas
+4. Confirme que o modelo Toto foi baixado corretamente do Hugging Face e está localizado na pasta `models/`
+5. Se encontrar erros relacionados ao modelo, verifique se a versão do modelo é compatível com a aplicação
 
 ## Licença
 
@@ -171,6 +187,18 @@ Warehouse Forecaster is a web application that allows users to upload historical
    pip install -r requirements.txt
    ```
 
+5. Download the Toto model from Hugging Face:
+   The Toto model is a large file and is not included in the repository. You need to download it manually from Hugging Face.
+   ```
+   # Install Hugging Face library
+   pip install huggingface_hub
+   
+   # Download the model using Hugging Face CLI
+   python -c "from huggingface_hub import hf_hub_download; hf_hub_download(repo_id='datadog/toto', filename='toto.pt', local_dir='models/')"
+   ```
+   
+   Alternatively, you can download the model directly from [Hugging Face](https://huggingface.co/datadog/toto) and place it in the project's `models/` folder.
+
 ## Running the Application
 
 Start the Streamlit app with:
@@ -209,10 +237,12 @@ The application allows you to configure:
 
 The forecasting is powered by the Toto model from Datadog, which is a transformer-based time series forecasting model. The model pipeline:
 
-1. Loads the Toto model
+1. Loads the Toto model (which must be downloaded separately from Hugging Face due to its size)
 2. Processes the input data
 3. Runs prediction using TotoForecaster
 4. Returns the forecast as a CSV string
+
+**Important note**: The Toto model is a large file (approximately 300MB) and is not included in the repository. Follow the installation instructions to download it from Hugging Face before running the application.
 
 ## Security
 
@@ -235,6 +265,8 @@ If you encounter issues:
 1. Ensure your CSV file follows the required format
 2. Check that your data is chronologically ordered
 3. Verify that you have all required dependencies installed
+4. Confirm that the Toto model has been properly downloaded from Hugging Face and is located in the `models/` folder
+5. If you encounter model-related errors, check if the model version is compatible with the application
 
 ## License
 
