@@ -173,90 +173,20 @@ def main():
         st.session_state.forecast_df = None
     if 'error_message' not in st.session_state:
         st.session_state.error_message = None
-    if 'sidebar_state' not in st.session_state:
-        st.session_state.sidebar_state = 'expanded'  # Default sidebar state
     
-    # --- Security: Domain Restriction ---
-    # This section checks if the app is being accessed from an allowed domain
-    # For beginners: This is a security measure to prevent unauthorized access
-    try:
-        # Get information about the current request
-        ctx = st.runtime.scriptrunner.get_script_run_ctx()
-        
-        # Check if we have request information and can access headers
-        if ctx and hasattr(ctx, 'request') and ctx.request:
-            # Get the host domain from the request headers
-            host = ctx.request.headers.get('host', '')
-            
-            # Only allow access from r2talk.com.br domains
-            if host and not host.endswith('r2talk.com.br'):
-                st.error("Access denied: This application can only be accessed from r2talk.com.br domains")
-                st.stop()  # Stop the app execution for unauthorized domains
-    except Exception as e:
-        # If there's any error in the domain checking process, log it but continue
-        import logging
-        logging.warning(f"Domain check warning: {str(e)}")
+    # Note: Domain restriction has been removed to allow access from any domain
     
     # --- Apply our custom CSS ---
     # This injects our CSS into the page to customize the appearance
     # The unsafe_allow_html=True parameter is needed to allow HTML/CSS code
     st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-    
-    # Add custom CSS for sidebar toggle button
-    sidebar_toggle_css = """
-    <style>
-    /* Style for the sidebar toggle button */
-    .sidebar-toggle-button button {
-        font-weight: bold;
-        height: 40px;
-        border-radius: 4px;
-        background-color: #0066cc;
-        color: white;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    /* Mobile-specific styles */
-    @media (max-width: 768px) {
-        .sidebar-toggle-button button {
-            width: 40px;
-            height: 40px;
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            z-index: 999;
-            border-radius: 50%;
-        }
-    }
-    </style>
-    """
-    st.markdown(sidebar_toggle_css, unsafe_allow_html=True)
 
-    # --- Sidebar Toggle Button ---
-    # Add a toggle button for the sidebar (especially useful for mobile)
-    toggle_col1, title_col, toggle_col2 = st.columns([0.1, 0.8, 0.1])
+    # --- Page Title ---
+    # st.title adds a large, prominent title to the page
+    st.title("📊 Warehouse Forecaster")
     
-    with toggle_col1:
-        # Create a div with our custom CSS class
-        st.markdown('<div class="sidebar-toggle-button">', unsafe_allow_html=True)
-        
-        # Add the sidebar toggle button with better icons
-        toggle_icon = "≡" if st.session_state.sidebar_state == 'collapsed' else "×"
-        if st.button(toggle_icon, key="sidebar_toggle"):
-            # Toggle sidebar state
-            st.session_state.sidebar_state = 'collapsed' if st.session_state.sidebar_state == 'expanded' else 'expanded'
-            st.rerun()
-            
-        st.markdown('</div>', unsafe_allow_html=True)
-    
-    with title_col:
-        # st.title adds a large, prominent title to the page
-        st.title("📊 Warehouse Forecaster")
-        
-        # st.caption adds a smaller, gray text below the title
-        st.caption("Upload a CSV file with historical data to generate a forecast.")
+    # st.caption adds a smaller, gray text below the title
+    st.caption("Upload a CSV file with historical data to generate a forecast.")
 
     # --- Layout: Sidebar for input, main for output ---
     # The 'with st.sidebar:' creates a sidebar on the left side of the app
@@ -278,9 +208,8 @@ def main():
     with open(example_path, "r") as f:
         example_content = f.read()
     
-    # Only show sidebar content if it's expanded
-    if st.session_state.sidebar_state == 'expanded':
-        with st.sidebar:
+    # Sidebar for inputs
+    with st.sidebar:
             
             # --- Forecast Length Input ---
             # st.number_input creates a field where users can type a number or use +/- buttons
@@ -364,10 +293,11 @@ def main():
     # Markdown allows us to format text with lists, bold, etc.
     # Here we provide step-by-step instructions for users
     st.markdown("""
-    1. Prepare a CSV file with two columns: `DATE` and `VALUE`
-    2. Use semicolon (;) as separator and comma (,) as decimal
-    3. Format dates as DD/MM/YYYY
-    4. Upload the file and click 'Generate Forecast'
+    1. **IMPORTANT**: This application does not work on mobile devices. A desktop or laptop is required.
+    2. Prepare a CSV file with two columns: `DATE` and `VALUE`
+    3. Use semicolon (;) as separator and comma (,) as decimal
+    4. Format dates as DD/MM/YYYY
+    5. Upload the file and click 'Generate Forecast'
     """)
     
     # Results section header
