@@ -34,6 +34,7 @@ import streamlit as st  # The main Streamlit library for creating web apps
 import pandas as pd   # For data manipulation and analysis
 import io            # For handling input/output operations
 from forecast.warehouse_forecast import execute_forecast  # Our custom forecasting function
+import streamlit.components.v1 as components  # For custom HTML/JS components
 
 # --- Custom CSS to clean up the user interface ---
 # This CSS code hides various Streamlit elements we don't need
@@ -172,6 +173,8 @@ def main():
         st.session_state.forecast_df = None
     if 'error_message' not in st.session_state:
         st.session_state.error_message = None
+    if 'sidebar_state' not in st.session_state:
+        st.session_state.sidebar_state = 'expanded'  # Default sidebar state
     
     # --- Security: Domain Restriction ---
     # This section checks if the app is being accessed from an allowed domain
@@ -198,101 +201,159 @@ def main():
     # This injects our CSS into the page to customize the appearance
     # The unsafe_allow_html=True parameter is needed to allow HTML/CSS code
     st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-
-    # --- Main Page Header ---
-    # st.title adds a large, prominent title to the page
-    st.title("📊 Warehouse Forecaster")
     
-    # st.caption adds a smaller, gray text below the title
-    st.caption("Upload a CSV file with historical data to generate a forecast.")
+    # Add custom CSS for sidebar toggle button
+    sidebar_toggle_css = """
+    <style>
+    /* Style for the sidebar toggle button */
+    .sidebar-toggle-button button {
+        font-weight: bold;
+        height: 40px;
+        border-radius: 4px;
+        background-color: #0066cc;
+        color: white;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Mobile-specific styles */
+    @media (max-width: 768px) {
+        .sidebar-toggle-button button {
+            width: 40px;
+            height: 40px;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 999;
+            border-radius: 50%;
+        }
+    }
+    </style>
+    """
+    st.markdown(sidebar_toggle_css, unsafe_allow_html=True)
+
+    # --- Sidebar Toggle Button ---
+    # Add a toggle button for the sidebar (especially useful for mobile)
+    toggle_col1, title_col, toggle_col2 = st.columns([0.1, 0.8, 0.1])
+    
+    with toggle_col1:
+        # Create a div with our custom CSS class
+        st.markdown('<div class="sidebar-toggle-button">', unsafe_allow_html=True)
+        
+        # Add the sidebar toggle button with better icons
+        toggle_icon = "≡" if st.session_state.sidebar_state == 'collapsed' else "×"
+        if st.button(toggle_icon, key="sidebar_toggle"):
+            # Toggle sidebar state
+            st.session_state.sidebar_state = 'collapsed' if st.session_state.sidebar_state == 'expanded' else 'expanded'
+            st.rerun()
+            
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    with title_col:
+        # st.title adds a large, prominent title to the page
+        st.title("📊 Warehouse Forecaster")
+        
+        # st.caption adds a smaller, gray text below the title
+        st.caption("Upload a CSV file with historical data to generate a forecast.")
 
     # --- Layout: Sidebar for input, main for output ---
     # The 'with st.sidebar:' creates a sidebar on the left side of the app
     # Everything indented under this will appear in the sidebar
-    with st.sidebar:
-        
-        # --- Forecast Length Input ---
-        # st.number_input creates a field where users can type a number or use +/- buttons
-        # This replaces the slider we had before for more precise input
-        forecast_length = st.number_input(
-            "Forecast Length (days)",           # Label shown above the input
-            min_value=1,                       # Minimum allowed value
-            max_value=90,                      # Maximum allowed value
-            value=30,                          # Default value
-            step=1,                            # Increment when using +/- buttons
-            help="Enter the number of days to forecast (between 1 and 90)"  # Tooltip text
-        )
-        
-        # --- Example Data Section ---
-        # This section provides example data for users to try the app
-        
-        # Button to load example data directly into the app
-        # When clicked, this will process the example data without requiring upload
-        load_example = st.button(
-            "Use CoffeeSales Example Data",     # Button text
-            use_container_width=True,           # Make button full width of sidebar
-            key="load_example"                  # Unique identifier for this button
-        )
-        
-        # Import os module to work with file paths
-        import os
-        
-        # Find the path to our example CSV file
-        example_path = os.path.join(os.path.dirname(__file__), "example", "CoffeeSales.csv")
-        
-        # Read the example file content
-        with open(example_path, "r") as f:
-            example_content = f.read()
-        
-        # Button to download the example file to the user's computer
-        # This helps users understand the required format
-        st.download_button(
-            label="Download CoffeeSales Example File",  # Button text
-            data=example_content,                      # The file content to download
-            file_name="CoffeeSales.csv",               # The default filename when downloading
-            mime="text/csv",                           # File type (CSV in this case)
-            use_container_width=True                   # Make button full width of sidebar
-        )
-        
-        # Process example data when Load Example Data is clicked
-        if load_example:
-            # Process example data immediately
-            with st.spinner("Processing example data..."):
-                try:
-                    # Call the execute_forecast function with the example content
-                    forecast_csv = execute_forecast(example_content, forecast_length=forecast_length)
-                    
-                    # Store the result in session state
-                    st.session_state.forecast_result = forecast_csv
-                    
-                    # Also parse it as a DataFrame for display
-                    forecast_df = pd.read_csv(io.StringIO(forecast_csv), sep=';', decimal=',')
-                    st.session_state.forecast_df = forecast_df
-                    st.session_state.error_message = None
-                    
-                    # Force a rerun to update the UI
-                    st.rerun()
-                    
-                except Exception as e:
-                    st.error(f"Error processing example data: {str(e)}")
-                    st.session_state.error_message = str(e)
-        
-        # --- File Upload Section ---
-        # This creates a file upload area where users can drag & drop or select files
-        uploaded_file = st.file_uploader(
-            "Upload CSV File",                # Label shown above the uploader
-            type=["csv"],                     # Only allow CSV files
-            accept_multiple_files=False      # Only allow one file at a time
-        )
-        
-        # --- Generate Forecast Button ---
-        # This is the main action button that processes the uploaded file
-        # The type="primary" makes it blue and stand out as the main action
-        run_forecast = st.button(
-            "Generate Forecast",              # Button text
-            type="primary",                   # Make it a primary (highlighted) button
-            use_container_width=True         # Make button full width of sidebar
-        )
+    
+    # Initialize variables that need to be accessed outside the sidebar
+    forecast_length = 30  # Default value
+    uploaded_file = None
+    run_forecast = False
+    load_example = False
+    
+    # Import os module to work with file paths
+    import os
+    
+    # Find the path to our example CSV file
+    example_path = os.path.join(os.path.dirname(__file__), "example", "CoffeeSales.csv")
+    
+    # Read the example file content
+    with open(example_path, "r") as f:
+        example_content = f.read()
+    
+    # Only show sidebar content if it's expanded
+    if st.session_state.sidebar_state == 'expanded':
+        with st.sidebar:
+            
+            # --- Forecast Length Input ---
+            # st.number_input creates a field where users can type a number or use +/- buttons
+            # This replaces the slider we had before for more precise input
+            forecast_length = st.number_input(
+                "Forecast Length (days)",           # Label shown above the input
+                min_value=1,                       # Minimum allowed value
+                max_value=90,                      # Maximum allowed value
+                value=30,                          # Default value
+                step=1,                            # Increment when using +/- buttons
+                help="Enter the number of days to forecast (between 1 and 90)"  # Tooltip text
+            )
+            
+            # --- Example Data Section ---
+            # This section provides example data for users to try the app
+            
+            # Button to load example data directly into the app
+            # When clicked, this will process the example data without requiring upload
+            load_example = st.button(
+                "Use CoffeeSales Example Data",     # Button text
+                use_container_width=True,           # Make button full width of sidebar
+                key="load_example"                  # Unique identifier for this button
+            )
+            
+            # Button to download the example file to the user's computer
+            # This helps users understand the required format
+            st.download_button(
+                label="Download CoffeeSales Example File",  # Button text
+                data=example_content,                      # The file content to download
+                file_name="CoffeeSales.csv",               # The default filename when downloading
+                mime="text/csv",                           # File type (CSV in this case)
+                use_container_width=True                   # Make button full width of sidebar
+            )
+            
+            # Process example data when Load Example Data is clicked
+            if load_example:
+                # Process example data immediately
+                with st.spinner("Processing example data..."):
+                    try:
+                        # Call the execute_forecast function with the example content
+                        forecast_csv = execute_forecast(example_content, forecast_length=forecast_length)
+                        
+                        # Store the result in session state
+                        st.session_state.forecast_result = forecast_csv
+                        
+                        # Also parse it as a DataFrame for display
+                        forecast_df = pd.read_csv(io.StringIO(forecast_csv), sep=';', decimal=',')
+                        st.session_state.forecast_df = forecast_df
+                        st.session_state.error_message = None
+                        
+                        # Force a rerun to update the UI
+                        st.rerun()
+                        
+                    except Exception as e:
+                        st.error(f"Error processing example data: {str(e)}")
+                        st.session_state.error_message = str(e)
+            
+            # --- File Upload Section ---
+            # This creates a file upload area where users can drag & drop or select files
+            uploaded_file = st.file_uploader(
+                "Upload CSV File",                # Label shown above the uploader
+                type=["csv"],                     # Only allow CSV files
+                accept_multiple_files=False      # Only allow one file at a time
+            )
+            
+            # --- Generate Forecast Button ---
+            # This is the main action button that processes the uploaded file
+            # The type="primary" makes it blue and stand out as the main action
+            run_forecast = st.button(
+                "Generate Forecast",              # Button text
+                type="primary",                   # Make it a primary (highlighted) button
+                use_container_width=True         # Make button full width of sidebar
+            )
 
     # --- Main Area: Instructions and Results ---
     # Everything outside the sidebar appears in the main panel
